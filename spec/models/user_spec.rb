@@ -6,8 +6,30 @@ describe User do
   it { should allow_mass_assignment_of(:password) }
   it { should allow_mass_assignment_of(:remember_me) }
 
+  it { should have_many(:event_registrations) }
+  it { should have_many(:events).through(:event_registrations) }
+  it { should have_many(:favorite_projects) }
+  it { should have_many(:favorites).through(:favorite_projects) }
+  it { should have_many(:projects).through(:favorite_projects) }
+  it { should have_many(:services) }
+  it { should have_one(:profile) }
+
   before do
     @user = User.new(email: 'captain@planet.com', password: 'passw0rd')
+  end
+
+  describe "with_github" do
+
+    before do
+      @user1 = create(:user)
+      @user2 = create(:user)
+      @service = @user1.services.create(provider: 'github', uid: 'foobar')
+    end
+
+    it "should return user who has github service" do
+      expect(User.with_github).to eq([@user1])
+    end
+
   end
 
   subject { @user }
