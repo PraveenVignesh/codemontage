@@ -9,24 +9,20 @@ describe Event do
   it { should have_many(:users).through(:event_registrations) }
 
   before(:each) do
-    @event1 = create(:event, start_date: Time.now, end_date: Time.now+1.day)
-    @event2 = create(:event, start_date: Time.now, end_date: Time.now)
-    @event3 = create(:event, start_date: Time.now+1.day, end_date: Time.now+2.day)
+    @event1 = create(:cm_event, :end_tomorrow, :public)
+    @event2 = create(:cm_event, :end_today)
+    @event3 = create(:cm_event, :future)
   end
 
   describe "upcoming event scope" do
-
     it "should return only upcoming events" do
       expect(Event.upcoming_events).to eq([@event1, @event3])
     end
-
   end
 
   describe "featured events" do
-
     it "should return only one upcoming event sorted by starting date" do
       expect(Event.featured).to eq(@event1)
     end
-
   end
 end

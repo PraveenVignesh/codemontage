@@ -11,10 +11,10 @@ describe Project do
 
   context "scopes" do
     before(:each) do
-      @organization = create(:organization)
-      @project1 = create(:project, :organization_id => @organization.id)
-      @project2 = create(:project, :organization_id => @organization.id, :is_active => false)
-      @project3 = create(:project, :organization_id => @organization.id, :is_approved => true)
+      @organization = create(:cm_organization)
+      @project1 = create(:cm_project, organization_id: @organization.id)
+      @project2 = create(:cm_project, :inactive, organization_id: @organization.id)
+      @project3 = create(:cm_project, :approved, organization_id: @organization.id)
     end
 
     describe "approved scope" do
@@ -24,7 +24,7 @@ describe Project do
     end
 
     describe "active scope" do
-      it "should return only approved & active project" do 
+      it "should return only approved & active project" do
         expect(Project.active).to eq([@project3])
       end
     end
@@ -34,37 +34,36 @@ describe Project do
         expect(Project.featured).to eq([@project3])
       end
     end
-
   end
 
   context "github-related methods" do
-
     let(:project) { Project.new }
-    let(:organization) { double(github_org: 'codemontage', github_url: 'https://github.com/codemontage') }
+    let(:organization) do
+      double(github_org: "codemontage", github_url: "https://github.com/codemontage")
+    end
 
     before do
       project.stub(:organization) { organization }
-      project.stub(:github_repo) { 'foo'}
+      project.stub(:github_repo) { "foo" }
     end
 
     describe "#github_display" do
       it "creates an organization/repo string" do
-        expect(project.github_display).to eq('codemontage/foo')
+        expect(project.github_display).to eq("codemontage/foo")
       end
     end
 
     describe "#github_url" do
       it "creates a repo url" do
-        expect(project.github_url).to eq('https://github.com/codemontage/foo')
+        expect(project.github_url).to eq("https://github.com/codemontage/foo")
       end
     end
 
     describe "#tasks_url" do
       it "creates an issues url" do
-        expect(project.tasks_url).to eq('https://github.com/codemontage/foo/issues')
+        expect(project.tasks_url).to eq("https://github.com/codemontage/foo/issues")
       end
     end
-
   end
 
   describe "GitHub API interaction" do
@@ -114,18 +113,15 @@ describe Project do
   end
 
   describe "#related_projects" do
-
-    let(:organization) { Organization.create!(name: 'CodeMontage') }
+    let(:organization) { create(:cm_organization) }
 
     before do
-      @project_1 = Project.create!(name: 'Code Montage', organization_id: organization.id, github_repo: 'codemontage')
-      @project_2 = Project.create!(name: 'Happy Days', organization_id: organization.id, github_repo: 'happydays')
+      @project_1 = create(:cm_project, organization_id: organization.id)
+      @project_2 = create(:cm_project, organization_id: organization.id)
     end
 
     it "returns its organization's other projects" do
       expect(@project_1.related_projects).to eq([@project_2])
     end
-
   end
-
 end
